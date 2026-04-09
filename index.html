@@ -8,8 +8,6 @@
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   :root{--azul:#00205C;--azul2:#385CAD;--oro:#C9A84C;--bg:#f4f6fb;--white:#fff;}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--bg);color:#1a1a2e;min-height:100vh;padding-bottom:110px;}
-
-  /* HEADER */
   header{background:var(--azul);position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,32,92,0.35);}
   .header-logo{display:flex;justify-content:center;padding:16px 16px 0;}
   .header-logo img{height:80px;width:auto;object-fit:contain;}
@@ -23,34 +21,28 @@
   .domingo-wrap{margin-top:8px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:10px;padding:10px 14px;display:none;}
   .domingo-wrap.show{display:flex;align-items:center;gap:10px;}
   .domingo-wrap label{font-size:12px;color:var(--oro);flex:1;line-height:1.4;}
-  .domingo-toggle{width:44px;height:26px;background:rgba(255,255,255,0.2);border-radius:13px;position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s;}
-  .domingo-toggle.on{background:var(--oro);}
-  .domingo-toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;transition:transform 0.2s;}
-  .domingo-toggle.on::after{transform:translateX(18px);}
-
-  /* RESUMEN TOP */
+  .toggle{width:44px;height:26px;background:rgba(255,255,255,0.2);border-radius:13px;position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s;}
+  .toggle.on{background:var(--oro);}
+  .toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;transition:transform 0.2s;}
+  .toggle.on::after{transform:translateX(18px);}
   .resumen-top{background:var(--azul2);padding:8px 16px;display:flex;align-items:center;gap:10px;}
   .resumen-top .r-item{flex:1;text-align:center;}
   .resumen-top .r-val{font-size:18px;font-weight:700;color:var(--white);}
   .resumen-top .r-lbl{font-size:10px;color:rgba(255,255,255,0.7);}
   .resumen-top .divider{width:1px;height:28px;background:rgba(255,255,255,0.2);}
-
-  /* CONTAINER */
   .container{padding:14px;}
-
-  /* CARDS FAMILIA */
   .section-card{background:var(--white);border-radius:14px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,32,92,0.08);}
   .section-header{background:var(--azul);color:var(--white);padding:11px 16px;font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
   .section-header .badge{background:var(--oro);color:var(--azul);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;min-width:24px;text-align:center;}
-
-  /* FILAS PRODUCTO */
   .product-row{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #f0f2f8;gap:12px;transition:background 0.15s;}
   .product-row:last-child{border-bottom:none;}
   .product-row.active{background:#f0f4ff;}
+  .product-row.oculto{display:none;}
   .product-name{font-size:14px;color:#1a1a2e;flex:1;line-height:1.3;}
   .product-row.active .product-name{color:var(--azul);font-weight:600;}
-
-  /* CONTROL CANTIDAD */
+  .mas-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;cursor:pointer;color:var(--azul2);font-size:12px;font-weight:600;border-top:1px dashed #dde3f0;background:#f8faff;user-select:none;}
+  .mas-btn .flecha{font-size:10px;transition:transform 0.2s;}
+  .mas-btn.abierto .flecha{transform:rotate(180deg);}
   .qty-control{display:flex;align-items:center;flex-shrink:0;}
   .qty-btn{width:34px;height:34px;border:1.5px solid var(--azul2);background:var(--white);color:var(--azul2);font-size:20px;font-weight:300;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:background 0.12s;}
   .qty-btn:first-child{border-radius:10px 0 0 10px;}
@@ -60,24 +52,37 @@
   .qty-input::-webkit-inner-spin-button,.qty-input::-webkit-outer-spin-button{-webkit-appearance:none;}
   .qty-input:focus{outline:none;background:#f0f4ff;}
 
-  /* NOTAS */
+  /* PEDIDO ESTÁNDAR */
+  .estandar-card{background:var(--white);border-radius:14px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,32,92,0.08);}
+  .estandar-header{background:#1a3a6b;color:var(--white);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;}
+  .estandar-header-text{flex:1;}
+  .estandar-header-text h3{font-size:13px;font-weight:700;margin-bottom:2px;}
+  .estandar-header-text p{font-size:11px;opacity:0.7;line-height:1.4;}
+  .estandar-body{padding:14px 16px;display:none;border-top:1px solid #e8eef8;}
+  .estandar-body.show{display:block;}
+  .dias-label{font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;}
+  .dias-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .dia-btn{width:42px;height:42px;border-radius:10px;border:2px solid #dde3f0;background:var(--white);color:#999;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+  .dia-btn.sel{border-color:var(--azul2);background:var(--azul2);color:var(--white);}
+  .estandar-info{background:#f0f4ff;border-radius:10px;padding:10px 12px;font-size:12px;color:#555;line-height:1.6;margin-bottom:12px;}
+  .estandar-info strong{color:var(--azul2);}
+  .btn-guardar-estandar{width:100%;background:var(--azul);color:var(--white);border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.15s;}
+  .btn-guardar-estandar:disabled{opacity:0.4;cursor:default;}
+  .btn-guardar-estandar:not(:disabled):active{opacity:0.85;}
+  .estandar-activo{background:#e8f5e9;border-radius:10px;padding:10px 12px;font-size:12px;color:#2E7D32;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .btn-desactivar{background:none;border:1.5px solid #c8e6c9;border-radius:8px;padding:6px 12px;font-size:12px;color:#2E7D32;cursor:pointer;margin-left:auto;white-space:nowrap;}
+
   .notas-card{background:var(--white);border-radius:14px;margin-bottom:12px;padding:16px;box-shadow:0 1px 4px rgba(0,32,92,0.08);}
   .notas-card label{font-size:12px;font-weight:700;color:var(--azul);display:block;margin-bottom:8px;letter-spacing:0.4px;text-transform:uppercase;}
   .notas-card textarea{width:100%;border:1.5px solid #dde3f0;border-radius:10px;padding:10px 12px;font-size:14px;color:#1a1a2e;resize:none;height:76px;font-family:inherit;}
   .notas-card textarea:focus{outline:none;border-color:var(--azul2);}
-
-  /* LEYENDA */
   .leyenda{border-left:3px solid var(--oro);background:#fffbf0;border-radius:0 10px 10px 0;padding:11px 14px;font-size:12px;color:#5a4a00;margin-bottom:16px;line-height:1.6;}
-
-  /* BARRA INFERIOR */
   .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--azul);padding:10px 16px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 -2px 12px rgba(0,32,92,0.25);z-index:200;}
   .bottom-info{flex:1;color:var(--white);}
   .bottom-info .b-total{font-size:20px;font-weight:700;}
   .bottom-info .b-sub{font-size:11px;opacity:0.65;margin-top:1px;}
-  .btn-enviar{background:var(--oro);color:var(--azul);border:none;border-radius:12px;padding:14px 22px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;transition:opacity 0.15s,transform 0.1s;letter-spacing:0.2px;}
+  .btn-enviar{background:var(--oro);color:var(--azul);border:none;border-radius:12px;padding:14px 22px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;transition:opacity 0.15s,transform 0.1s;}
   .btn-enviar:active{opacity:0.85;transform:scale(0.97);}
-
-  /* MODAL */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:flex-end;}
   .modal-overlay.open{display:flex;}
   .modal{background:var(--white);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-height:85vh;overflow-y:auto;}
@@ -92,8 +97,6 @@
   .modal-linea .m-cant{font-weight:700;color:var(--azul);background:#e8eef8;padding:2px 8px;border-radius:20px;font-size:12px;}
   .btn-confirmar{width:100%;background:var(--azul);color:var(--white);border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;}
   .btn-cancelar{width:100%;background:none;border:1.5px solid #dde3f0;border-radius:12px;padding:13px;font-size:14px;color:#888;cursor:pointer;}
-
-  /* ÉXITO */
   .success-screen{display:none;position:fixed;inset:0;background:var(--azul);z-index:400;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;}
   .success-screen.open{display:flex;}
   .success-screen .s-logo{height:70px;margin-bottom:28px;opacity:0.9;}
@@ -102,8 +105,6 @@
   .success-screen p{color:rgba(255,255,255,0.75);font-size:14px;line-height:1.7;margin-bottom:32px;}
   .success-screen .s-oro{color:var(--oro);font-weight:700;}
   .btn-nuevo{background:var(--oro);color:var(--azul);border:none;border-radius:12px;padding:15px 32px;font-size:15px;font-weight:800;cursor:pointer;}
-
-  /* RESPONSIVE ESCRITORIO */
   @media(min-width:640px){
     body{background:#e8ecf4;}
     header{max-width:480px;margin:0 auto;border-radius:0 0 16px 16px;}
@@ -115,11 +116,8 @@
 </style>
 </head>
 <body>
-
 <header>
-  <div class="header-logo">
-    <img id="logoImg" src="" alt="Tahona por Salvador Márquez">
-  </div>
+  <div class="header-logo"><img id="logoImg" src="" alt="Tahona por Salvador Márquez"></div>
   <div class="header-cliente">
     <div class="oro-dot"></div>
     <div style="flex:1">
@@ -132,26 +130,17 @@
     <input type="date" id="fechaEntrega" class="fecha-input">
     <div class="domingo-wrap" id="domingoWrap">
       <label>Este pedido es para el domingo<br><small style="opacity:0.8">Se entrega el sábado seleccionado</small></label>
-      <div class="domingo-toggle" id="domingoToggle" onclick="toggleDomingo()"></div>
+      <div class="toggle" id="domingoToggle" onclick="toggleDomingo()"></div>
     </div>
   </div>
 </header>
 
 <div class="resumen-top">
-  <div class="r-item">
-    <div class="r-val" id="rTotal">0</div>
-    <div class="r-lbl">Unidades</div>
-  </div>
+  <div class="r-item"><div class="r-val" id="rTotal">0</div><div class="r-lbl">Unidades</div></div>
   <div class="divider"></div>
-  <div class="r-item">
-    <div class="r-val" id="rProductos">0</div>
-    <div class="r-lbl">Productos</div>
-  </div>
+  <div class="r-item"><div class="r-val" id="rProductos">0</div><div class="r-lbl">Productos</div></div>
   <div class="divider"></div>
-  <div class="r-item">
-    <div class="r-val" id="rFamilias">0</div>
-    <div class="r-lbl">Familias</div>
-  </div>
+  <div class="r-item"><div class="r-val" id="rFamilias">0</div><div class="r-lbl">Familias</div></div>
 </div>
 
 <div class="container" id="mainContainer"></div>
@@ -180,7 +169,7 @@
   <img class="s-logo" id="successLogo" src="" alt="Logo">
   <div class="s-check">✅</div>
   <h2>¡Pedido enviado!</h2>
-  <p id="successMsg">Tu pedido ha sido registrado.<br>Lo recibirás <span class="s-oro" id="successFecha"></span>.</p>
+  <p>Tu pedido ha sido registrado.<br>Lo recibirás <span class="s-oro" id="successFecha"></span>.</p>
   <button class="btn-nuevo" onclick="nuevoPedido()">Hacer otro pedido</button>
 </div>
 
@@ -198,172 +187,398 @@ const FAMILIAS = {
   'Especiales':['Brioche Molde','Burguer 150','Burguer 115','Burguer Cerveza','Chatocao 125'],
 };
 
-let cliente='', cantidades={};
+const DIAS = ['L','M','X','J','V','S'];
+const DIAS_NOMBRES = {'L':'Lunes','M':'Martes','X':'Miércoles','J':'Jueves','V':'Viernes','S':'Sábado'};
 
-function init(){
-  document.getElementById('logoImg').src='data:image/png;base64,'+LOGO_B64;
-  document.getElementById('successLogo').src='data:image/png;base64,'+LOGO_B64;
-  const params=new URLSearchParams(window.location.search);
-  cliente=params.get('cliente')||'Cliente';
-  document.getElementById('nombreCliente').textContent=cliente;
+let cliente = '';
+let cantidades = {};
+let esDomingo = false;
+
+// ── Habituales: productos que el cliente ha pedido antes ──
+// Guardados en localStorage por cliente
+function getHabituales() {
+  try {
+    const raw = localStorage.getItem('hab_' + cliente);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function guardarHabituales(lista) {
+  try { localStorage.setItem('hab_' + cliente, JSON.stringify(lista)); } catch(e) {}
+}
+
+function actualizarHabituales() {
+  const pedidos = Object.entries(cantidades).filter(([,v]) => v > 0).map(([p]) => p);
+  if (!pedidos.length) return;
+  const actuales = getHabituales();
+  const nuevos = [...new Set([...actuales, ...pedidos])];
+  guardarHabituales(nuevos);
+}
+
+// ── Standing order: estado guardado en localStorage ──
+function getEstandar() {
+  try {
+    const raw = localStorage.getItem('std_' + cliente);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function setEstandar(datos) {
+  try { localStorage.setItem('std_' + cliente, JSON.stringify(datos)); } catch(e) {}
+}
+
+function borrarEstandar() {
+  try { localStorage.removeItem('std_' + cliente); } catch(e) {}
+}
+
+// ── Init ──
+function init() {
+  document.getElementById('logoImg').src = 'data:image/png;base64,' + LOGO_B64;
+  document.getElementById('successLogo').src = 'data:image/png;base64,' + LOGO_B64;
+  const params = new URLSearchParams(window.location.search);
+  cliente = params.get('cliente') || '__CLIENTE__';
+  document.getElementById('nombreCliente').textContent = cliente;
   generarFechas();
   generarFormulario();
 }
 
-let esDomingo=false;
+let esDomingoFlag = false;
 
-function generarFechas(){
-  const inp=document.getElementById('fechaEntrega');
-  const hoy=new Date();
-  // Mínimo: mañana
-  const man=new Date(hoy); man.setDate(hoy.getDate()+1);
-  const fmt=d=>d.toISOString().split('T')[0];
-  inp.min=fmt(man);
-  inp.value=fmt(man);
-  // Deshabilitar domingos via JS al cambiar fecha
-  inp.addEventListener('change',()=>{
-    const sel=new Date(inp.value+'T12:00:00');
-    // Si eligen domingo, saltar al lunes
-    if(sel.getDay()===0){
-      sel.setDate(sel.getDate()+1);
-      inp.value=fmt(sel);
-    }
-    // Mostrar opción domingo si es sábado
-    const esSabado=sel.getDay()===6;
-    document.getElementById('domingoWrap').classList.toggle('show',esSabado);
-    if(!esSabado){ esDomingo=false; document.getElementById('domingoToggle').classList.remove('on'); }
+function generarFechas() {
+  const inp = document.getElementById('fechaEntrega');
+  const hoy = new Date();
+  const man = new Date(hoy); man.setDate(hoy.getDate() + 1);
+  const fmt = d => d.toISOString().split('T')[0];
+  inp.min = fmt(man);
+  inp.value = fmt(man);
+  inp.addEventListener('change', () => {
+    const sel = new Date(inp.value + 'T12:00:00');
+    if (sel.getDay() === 0) { sel.setDate(sel.getDate() + 1); inp.value = fmt(sel); }
+    const esSab = sel.getDay() === 6;
+    document.getElementById('domingoWrap').classList.toggle('show', esSab);
+    if (!esSab) { esDomingoFlag = false; document.getElementById('domingoToggle').classList.remove('on'); }
   });
 }
 
-function toggleDomingo(){
-  esDomingo=!esDomingo;
-  document.getElementById('domingoToggle').classList.toggle('on',esDomingo);
+function toggleDomingo() {
+  esDomingoFlag = !esDomingoFlag;
+  document.getElementById('domingoToggle').classList.toggle('on', esDomingoFlag);
 }
 
-function generarFormulario(){
-  const c=document.getElementById('mainContainer');
-  c.innerHTML='';
-  for(const[fam,prods] of Object.entries(FAMILIAS)){
-    const card=document.createElement('div');
-    card.className='section-card';
-    const hdr=document.createElement('div');
-    hdr.className='section-header';
-    hdr.innerHTML=fam+'<span class="badge" id="badge-'+fam+'">0</span>';
+function generarFormulario() {
+  const c = document.getElementById('mainContainer');
+  c.innerHTML = '';
+
+  // Sección pedido estándar — siempre primera
+  c.appendChild(crearSeccionEstandar());
+
+  const habituales = getHabituales();
+  const tieneHabituales = habituales.length > 0;
+
+  for (const [fam, prods] of Object.entries(FAMILIAS)) {
+    const habFam = prods.filter(p => habituales.includes(p));
+    const otrosFam = prods.filter(p => !habituales.includes(p));
+
+    // Solo mostrar la familia si tiene productos habituales O si no hay habituales aún
+    const prodsVisibles = tieneHabituales ? habFam : prods;
+    const prodsOcultos = tieneHabituales ? otrosFam : [];
+
+    if (tieneHabituales && habFam.length === 0) continue; // familia sin habituales, no mostrar
+
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    const hdr = document.createElement('div');
+    hdr.className = 'section-header';
+    hdr.innerHTML = fam + '<span class="badge" id="badge-' + fam + '">0</span>';
     card.appendChild(hdr);
-    for(const p of prods){
-      cantidades[p]=0;
-      card.appendChild(crearFila(p,fam));
+
+    // Productos habituales (siempre visibles)
+    for (const p of prodsVisibles) {
+      cantidades[p] = 0;
+      card.appendChild(crearFila(p, fam, false));
     }
+
+    // Productos ocultos con desplegable
+    if (prodsOcultos.length > 0) {
+      const masBtn = document.createElement('div');
+      masBtn.className = 'mas-btn';
+      masBtn.id = 'mas-' + fam;
+      masBtn.innerHTML = '➕ Añadir más productos <span class="flecha">▼</span>';
+      masBtn.onclick = () => toggleMas(fam, masBtn);
+      card.appendChild(masBtn);
+
+      for (const p of prodsOcultos) {
+        cantidades[p] = 0;
+        const fila = crearFila(p, fam, true);
+        fila.dataset.extra = 'true';
+        fila.dataset.fam = fam;
+        card.appendChild(fila);
+      }
+    }
+
     c.appendChild(card);
   }
-  const notas=document.createElement('div');
-  notas.className='notas-card';
-  notas.innerHTML='<label>Notas adicionales</label><textarea id="notas" placeholder="Observaciones, cambios o productos especiales..."></textarea>';
+
+  const notas = document.createElement('div');
+  notas.className = 'notas-card';
+  notas.innerHTML = '<label>Notas adicionales</label><textarea id="notas" placeholder="Observaciones, cambios o productos especiales..."></textarea>';
   c.appendChild(notas);
-  const ley=document.createElement('div');
-  ley.className='leyenda';
-  ley.innerHTML='📌 <strong>Recuerda:</strong> los pedidos se entregan al día siguiente. El pan del domingo se suministra el sábado, ya que los domingos no hay reparto.';
+
+  const ley = document.createElement('div');
+  ley.className = 'leyenda';
+  ley.innerHTML = '📌 <strong>Recuerda:</strong> los pedidos se entregan al día siguiente. El pan del domingo se suministra el sábado.';
   c.appendChild(ley);
 }
 
-function crearFila(prod,fam){
-  const row=document.createElement('div');
-  row.className='product-row';
-  const nm=document.createElement('div');
-  nm.className='product-name'; nm.textContent=prod;
-  const ctrl=document.createElement('div');
-  ctrl.className='qty-control';
-  const bm=document.createElement('button');
-  bm.className='qty-btn'; bm.textContent='−';
-  bm.onclick=()=>cambiar(prod,fam,-1,row,inp);
-  const inp=document.createElement('input');
-  inp.type='number'; inp.className='qty-input'; inp.value=0; inp.min=0;
-  inp.onchange=()=>{
-    const v=Math.max(0,parseInt(inp.value)||0);
-    inp.value=v; cantidades[prod]=v;
-    row.classList.toggle('active',v>0);
+function toggleMas(fam, btn) {
+  const abierto = btn.classList.toggle('abierto');
+  document.querySelectorAll('[data-extra="true"][data-fam="' + fam + '"]').forEach(f => {
+    f.classList.toggle('oculto', !abierto);
+  });
+}
+
+function crearFila(prod, fam, oculto) {
+  const row = document.createElement('div');
+  row.className = 'product-row' + (oculto ? ' oculto' : '');
+  const nm = document.createElement('div');
+  nm.className = 'product-name'; nm.textContent = prod;
+  const ctrl = document.createElement('div');
+  ctrl.className = 'qty-control';
+  const bm = document.createElement('button');
+  bm.className = 'qty-btn'; bm.textContent = '−';
+  bm.onclick = () => cambiar(prod, fam, -1, row, inp);
+  const inp = document.createElement('input');
+  inp.type = 'number'; inp.className = 'qty-input'; inp.value = 0; inp.min = 0;
+  inp.onchange = () => {
+    const v = Math.max(0, parseInt(inp.value) || 0);
+    inp.value = v; cantidades[prod] = v;
+    row.classList.toggle('active', v > 0);
     actualizarBadge(fam); actualizarResumen();
   };
-  const bp=document.createElement('button');
-  bp.className='qty-btn'; bp.textContent='+';
-  bp.onclick=()=>cambiar(prod,fam,1,row,inp);
+  const bp = document.createElement('button');
+  bp.className = 'qty-btn'; bp.textContent = '+';
+  bp.onclick = () => cambiar(prod, fam, 1, row, inp);
   ctrl.appendChild(bm); ctrl.appendChild(inp); ctrl.appendChild(bp);
   row.appendChild(nm); row.appendChild(ctrl);
   return row;
 }
 
-function cambiar(prod,fam,delta,row,inp){
-  const v=Math.max(0,(cantidades[prod]||0)+delta);
-  cantidades[prod]=v; inp.value=v;
-  row.classList.toggle('active',v>0);
+function cambiar(prod, fam, delta, row, inp) {
+  const v = Math.max(0, (cantidades[prod] || 0) + delta);
+  cantidades[prod] = v; inp.value = v;
+  row.classList.toggle('active', v > 0);
   actualizarBadge(fam); actualizarResumen();
 }
 
-function actualizarBadge(fam){
-  const total=FAMILIAS[fam].reduce((s,p)=>s+(cantidades[p]||0),0);
-  const b=document.getElementById('badge-'+fam);
-  if(b) b.textContent=total;
+function actualizarBadge(fam) {
+  const total = Object.entries(cantidades)
+    .filter(([p]) => FAMILIAS[fam] && FAMILIAS[fam].includes(p))
+    .reduce((s, [,v]) => s + v, 0);
+  const b = document.getElementById('badge-' + fam);
+  if (b) b.textContent = total;
 }
 
-function actualizarResumen(){
-  const lineas=Object.entries(cantidades).filter(([,v])=>v>0);
-  const totalUds=lineas.reduce((s,[,v])=>s+v,0);
-  const fams=new Set(lineas.map(([p])=>{
-    for(const[f,ps] of Object.entries(FAMILIAS)) if(ps.includes(p)) return f;
+function actualizarResumen() {
+  const lineas = Object.entries(cantidades).filter(([,v]) => v > 0);
+  const totalUds = lineas.reduce((s, [,v]) => s + v, 0);
+  const fams = new Set(lineas.map(([p]) => {
+    for (const [f, ps] of Object.entries(FAMILIAS)) if (ps.includes(p)) return f;
   })).size;
-  document.getElementById('rTotal').textContent=totalUds;
-  document.getElementById('rProductos').textContent=lineas.length;
-  document.getElementById('rFamilias').textContent=fams;
-  document.getElementById('bTotal').textContent=totalUds+' uds';
-  document.getElementById('bSub').textContent=lineas.length>0?lineas.length+' producto'+(lineas.length>1?'s':''):'Sin productos seleccionados';
+  document.getElementById('rTotal').textContent = totalUds;
+  document.getElementById('rProductos').textContent = lineas.length;
+  document.getElementById('rFamilias').textContent = fams;
+  document.getElementById('bTotal').textContent = totalUds + ' uds';
+  document.getElementById('bSub').textContent = lineas.length > 0
+    ? lineas.length + ' producto' + (lineas.length > 1 ? 's' : '')
+    : 'Sin productos seleccionados';
 }
 
-function abrirModal(){
-  const lineas=Object.entries(cantidades).filter(([,v])=>v>0);
-  if(!lineas.length){alert('Añade al menos un producto antes de enviar.');return;}
-  const fechaRaw=document.getElementById('fechaEntrega').value;
-  const [y,m,d]=fechaRaw.split('-');
-  const ds=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  const ms=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const fechaObj=new Date(fechaRaw+'T12:00:00');
-  const fechaFmt=ds[fechaObj.getDay()]+' '+parseInt(d)+' de '+ms[parseInt(m)-1]+' '+y;
-  const fecha=esDomingo?'Pan domingo — entrega '+fechaFmt:fechaFmt;
-  document.getElementById('modalFecha').textContent='Entrega: '+fecha;
-  document.getElementById('modalDetalle').innerHTML=lineas.map(([p,v])=>
-    '<div class="modal-linea"><span class="m-prod">'+p+'</span><span class="m-cant">'+v+' uds</span></div>'
+// ── PEDIDO ESTÁNDAR ──
+let diasSeleccionados = new Set();
+
+function crearSeccionEstandar() {
+  const estandar = getEstandar();
+  const card = document.createElement('div');
+  card.className = 'estandar-card';
+  card.id = 'estandar-card';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'estandar-header';
+  hdr.onclick = () => toggleEstandarBody();
+  hdr.innerHTML = `
+    <div class="estandar-header-text">
+      <h3>📅 Pedido estándar</h3>
+      <p>Activa un pedido fijo automático para los días que elijas</p>
+    </div>
+    <div class="toggle" id="estandar-toggle" style="background:${estandar ? 'var(--oro)' : 'rgba(255,255,255,0.2)'}">
+      <span style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;display:block;transition:transform 0.2s;transform:${estandar ? 'translateX(18px)' : 'none'}"></span>
+    </div>`;
+  card.appendChild(hdr);
+
+  const body = document.createElement('div');
+  body.className = 'estandar-body' + (estandar ? ' show' : '');
+  body.id = 'estandar-body';
+
+  if (estandar) {
+    // Mostrar estado activo
+    body.innerHTML = `
+      <div class="estandar-activo">
+        ✅ Pedido estándar activo — <strong>${estandar.dias.map(d => DIAS_NOMBRES[d]).join(', ')}</strong>
+        <button class="btn-desactivar" onclick="desactivarEstandar()">Desactivar</button>
+      </div>
+      <div class="estandar-info">
+        Los productos de tu último pedido se cargarán automáticamente esos días.<br>
+        <strong>Para modificar:</strong> desactiva y vuelve a configurar.
+      </div>`;
+  } else {
+    // Mostrar configuración
+    body.innerHTML = `
+      <div class="dias-label">Selecciona los días de tu pedido estándar</div>
+      <div class="dias-grid" id="dias-grid"></div>
+      <div class="estandar-info">
+        Se usarán las cantidades de <strong>este pedido</strong> como base para los días seleccionados.<br>
+        Podrás hacer pedidos extra cualquier otro día sin problema.
+      </div>
+      <button class="btn-guardar-estandar" id="btn-guardar-std" onclick="guardarEstandar()" disabled>
+        Activar pedido estándar
+      </button>`;
+
+    setTimeout(() => {
+      const grid = document.getElementById('dias-grid');
+      if (!grid) return;
+      DIAS.forEach(d => {
+        const btn = document.createElement('button');
+        btn.className = 'dia-btn';
+        btn.textContent = d;
+        btn.title = DIAS_NOMBRES[d];
+        btn.onclick = () => {
+          if (diasSeleccionados.has(d)) { diasSeleccionados.delete(d); btn.classList.remove('sel'); }
+          else { diasSeleccionados.add(d); btn.classList.add('sel'); }
+          const btnGuardar = document.getElementById('btn-guardar-std');
+          if (btnGuardar) btnGuardar.disabled = diasSeleccionados.size === 0;
+        };
+        grid.appendChild(btn);
+      });
+    }, 0);
+  }
+
+  card.appendChild(body);
+  return card;
+}
+
+function toggleEstandarBody() {
+  const body = document.getElementById('estandar-body');
+  const tog = document.getElementById('estandar-toggle');
+  if (!body) return;
+  const abierto = body.classList.toggle('show');
+  // Actualizar apariencia toggle según estado
+  const estandar = getEstandar();
+  if (!estandar) {
+    tog.style.background = abierto ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.2)';
+  }
+}
+
+function guardarEstandar() {
+  if (diasSeleccionados.size === 0) return;
+  const lineas = Object.entries(cantidades).filter(([,v]) => v > 0);
+  if (lineas.length === 0) {
+    alert('Añade al menos un producto al pedido antes de activar el estándar.');
+    return;
+  }
+  const datos = {
+    dias: [...diasSeleccionados],
+    productos: lineas.map(([producto, cantidad]) => ({ producto, cantidad })),
+    activadoEl: new Date().toISOString()
+  };
+  setEstandar(datos);
+
+  // Enviar al servidor para crear standing order en Sheets
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      accion: 'guardarStandingOrder',
+      cliente,
+      dias: datos.dias,
+      productos: datos.productos
+    }),
+    mode: 'no-cors'
+  }).catch(() => {});
+
+  // Actualizar UI
+  const card = document.getElementById('estandar-card');
+  if (card) card.replaceWith(crearSeccionEstandar());
+  alert('✅ Pedido estándar activado para: ' + datos.dias.map(d => DIAS_NOMBRES[d]).join(', '));
+}
+
+function desactivarEstandar() {
+  if (!confirm('¿Desactivar el pedido estándar?')) return;
+  borrarEstandar();
+
+  // Notificar al servidor
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accion: 'borrarStandingOrder', cliente }),
+    mode: 'no-cors'
+  }).catch(() => {});
+
+  const card = document.getElementById('estandar-card');
+  if (card) card.replaceWith(crearSeccionEstandar());
+}
+
+// ── MODAL Y ENVÍO ──
+function abrirModal() {
+  const lineas = Object.entries(cantidades).filter(([,v]) => v > 0);
+  if (!lineas.length) { alert('Añade al menos un producto antes de enviar.'); return; }
+  const fechaRaw = document.getElementById('fechaEntrega').value;
+  const [y, m, d] = fechaRaw.split('-');
+  const ds = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const ms = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const fechaObj = new Date(fechaRaw + 'T12:00:00');
+  const fechaFmt = ds[fechaObj.getDay()] + ' ' + parseInt(d) + ' de ' + ms[parseInt(m) - 1] + ' ' + y;
+  const fecha = esDomingoFlag ? 'Pan domingo — entrega ' + fechaFmt : fechaFmt;
+  document.getElementById('modalFecha').textContent = 'Entrega: ' + fecha;
+  document.getElementById('modalDetalle').innerHTML = lineas.map(([p, v]) =>
+    '<div class="modal-linea"><span class="m-prod">' + p + '</span><span class="m-cant">' + v + ' uds</span></div>'
   ).join('');
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-function cerrarModal(){document.getElementById('modalOverlay').classList.remove('open');}
+function cerrarModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
-function enviarPedido(){
-  const lineas=Object.entries(cantidades).filter(([,v])=>v>0);
-  const fechaRaw2=document.getElementById('fechaEntrega').value;
-  const [y2,m2,d2]=fechaRaw2.split('-');
-  const ds2=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  const ms2=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const fechaObj2=new Date(fechaRaw2+'T12:00:00');
-  const fechaFmt2=ds2[fechaObj2.getDay()]+' '+parseInt(d2)+' de '+ms2[parseInt(m2)-1]+' '+y2;
-  const fecha=esDomingo?'Pan domingo — entrega '+fechaFmt2:fechaFmt2;
-  const notas=document.getElementById('notas').value;
-  fetch(SCRIPT_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({cliente,fecha,notas,productos:lineas.map(([producto,cantidad])=>({producto,cantidad}))}),
-    mode:'no-cors'
-  }).catch(()=>{});
+function enviarPedido() {
+  const lineas = Object.entries(cantidades).filter(([,v]) => v > 0);
+  const fechaRaw = document.getElementById('fechaEntrega').value;
+  const [y, m, d] = fechaRaw.split('-');
+  const ds = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const ms = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const fechaObj = new Date(fechaRaw + 'T12:00:00');
+  const fechaFmt = ds[fechaObj.getDay()] + ' ' + parseInt(d) + ' de ' + ms[parseInt(m) - 1] + ' ' + y;
+  const fecha = esDomingoFlag ? 'Pan domingo — entrega ' + fechaFmt : fechaFmt;
+  const notas = document.getElementById('notas').value;
+
+  // Guardar habituales antes de enviar
+  actualizarHabituales();
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cliente, fecha, notas, productos: lineas.map(([producto, cantidad]) => ({ producto, cantidad })) }),
+    mode: 'no-cors'
+  }).catch(() => {});
+
   cerrarModal();
-  document.getElementById('successFecha').textContent=fecha;
+  document.getElementById('successFecha').textContent = fecha;
   document.getElementById('successScreen').classList.add('open');
 }
 
-function nuevoPedido(){
-  for(const p in cantidades) cantidades[p]=0;
-  document.querySelectorAll('.qty-input').forEach(i=>i.value=0);
-  document.querySelectorAll('.product-row').forEach(r=>r.classList.remove('active'));
-  document.querySelectorAll('.badge').forEach(b=>b.textContent='0');
-  document.getElementById('notas').value='';
+function nuevoPedido() {
+  for (const p in cantidades) cantidades[p] = 0;
+  document.querySelectorAll('.qty-input').forEach(i => i.value = 0);
+  document.querySelectorAll('.product-row').forEach(r => r.classList.remove('active'));
+  document.querySelectorAll('.badge').forEach(b => b.textContent = '0');
+  document.getElementById('notas').value = '';
   actualizarResumen();
   document.getElementById('successScreen').classList.remove('open');
 }
