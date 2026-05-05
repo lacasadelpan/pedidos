@@ -18,6 +18,12 @@
   .fecha-wrap{padding:10px 16px 14px;background:var(--azul);}
   .fecha-label{font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:5px;letter-spacing:0.3px;}
   .fecha-input{width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);border-radius:10px;padding:10px 14px;color:var(--white);font-size:13px;-webkit-appearance:none;appearance:none;color-scheme:dark;}
+  .countdown-wrap{padding:8px 16px 10px;background:var(--azul);display:flex;align-items:center;gap:10px;}
+  .countdown-bar-bg{flex:1;height:6px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden;}
+  .countdown-bar{height:100%;border-radius:3px;transition:width 1s linear,background 0.5s;}
+  .countdown-text{font-size:12px;color:rgba(255,255,255,0.85);white-space:nowrap;font-weight:600;min-width:80px;text-align:right;}
+  .countdown-text.urgente{color:#FFB74D;}
+  .countdown-text.cerrado{color:rgba(255,255,255,0.5);}
   .domingo-wrap{margin-top:8px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:10px;padding:10px 14px;display:none;}
   .domingo-wrap.show{display:flex;align-items:center;gap:10px;}
   .domingo-wrap label{font-size:12px;color:var(--oro);flex:1;line-height:1.4;}
@@ -95,6 +101,9 @@
   .modal-linea:last-child{border-bottom:none;}
   .modal-linea .m-prod{color:#1a1a2e;flex:1;}
   .modal-linea .m-cant{font-weight:700;color:var(--azul);background:#e8eef8;padding:2px 8px;border-radius:20px;font-size:12px;}
+  .aviso-horario{background:#FFF3E0;border-left:4px solid #E65100;border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#BF360C;line-height:1.5;display:none;}
+  .aviso-horario.show{display:block;}
+  .aviso-horario strong{display:block;margin-bottom:4px;font-size:14px;}
   .btn-confirmar{width:100%;background:var(--azul);color:var(--white);border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;}
   .btn-cancelar{width:100%;background:none;border:1.5px solid #dde3f0;border-radius:12px;padding:13px;font-size:14px;color:#888;cursor:pointer;}
   .success-screen{display:none;position:fixed;inset:0;background:var(--azul);z-index:400;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;}
@@ -133,6 +142,12 @@
       <div class="toggle" id="domingoToggle" onclick="toggleDomingo()"></div>
     </div>
   </div>
+  <div class="countdown-wrap">
+    <div class="countdown-bar-bg">
+      <div class="countdown-bar" id="countdownBar"></div>
+    </div>
+    <div class="countdown-text" id="countdownText"></div>
+  </div>
 </header>
 
 <div class="resumen-top">
@@ -160,6 +175,10 @@
     <h2>Confirma tu pedido</h2>
     <div class="modal-fecha" id="modalFecha"></div>
     <div class="modal-detalle" id="modalDetalle"></div>
+    <div class="aviso-horario" id="avisoHorario">
+      <strong>⚠️ Pedido fuera del horario de cierre</strong>
+      Los pedidos se admiten hasta las 20:00 h. Tu pedido ha sido recibido fuera de ese horario, por lo que lo produciremos para el día siguiente al indicado.
+    </div>
     <button class="btn-confirmar" onclick="enviarPedido()">Confirmar y enviar</button>
     <button class="btn-cancelar" onclick="cerrarModal()">Revisar pedido</button>
   </div>
@@ -240,17 +259,95 @@ function init() {
   document.getElementById('nombreCliente').textContent = cliente;
   generarFechas();
   generarFormulario();
+  iniciarContador();
 }
 
 let esDomingoFlag = false;
+
+const HORA_CIERRE = 20; // hora límite de pedidos
+
+function iniciarContador() {
+  function actualizar() {
+    const ahora = new Date();
+    const cierre = new Date(ahora);
+    cierre.setHours(HORA_CIERRE, 0, 0, 0);
+
+    const bar  = document.getElementById('countdownBar');
+    const txt  = document.getElementById('countdownText');
+    if (!bar || !txt) return;
+
+    const inicioDelDia = new Date(ahora); inicioDelDia.setHours(0,0,0,0);
+    const totalMs  = cierre - inicioDelDia;  // ms desde medianoche hasta cierre
+    const restanMs = cierre - ahora;
+
+    if (restanMs <= 0) {
+      // Fuera de horario
+      bar.style.width = '0%';
+      bar.style.background = 'rgba(255,255,255,0.2)';
+      txt.textContent = 'Cierre: 20:00 h';
+      txt.className = 'countdown-text cerrado';
+      return;
+    }
+
+    const pct = Math.max(0, Math.min(100, (restanMs / totalMs) * 100));
+    bar.style.width = pct + '%';
+
+    const horas   = Math.floor(restanMs / 3600000);
+    const minutos = Math.floor((restanMs % 3600000) / 60000);
+    const segs    = Math.floor((restanMs % 60000) / 1000);
+
+    let label = '';
+    if (horas > 0) {
+      label = horas + 'h ' + String(minutos).padStart(2,'0') + 'm para el cierre';
+    } else if (minutos > 0) {
+      label = minutos + 'm ' + String(segs).padStart(2,'0') + 's para el cierre';
+    } else {
+      label = segs + 's para el cierre';
+    }
+    txt.textContent = label;
+
+    // Color: verde → amarillo → naranja según tiempo restante
+    if (restanMs > 3600000) {
+      bar.style.background = '#66BB6A';       // > 1h: verde
+      txt.className = 'countdown-text';
+    } else if (restanMs > 1800000) {
+      bar.style.background = '#FFA726';       // 30-60min: naranja
+      txt.className = 'countdown-text urgente';
+    } else {
+      bar.style.background = '#EF5350';       // < 30min: rojo
+      txt.className = 'countdown-text urgente';
+    }
+  }
+
+  actualizar();
+  setInterval(actualizar, 1000);
+}
+
+function fueraDeHorario() {
+  return new Date().getHours() >= HORA_CIERRE;
+}
+
+function fechaEntregaDefecto() {
+  // Si es después de las 20:00, la entrega mínima es pasado mañana
+  const hoy = new Date();
+  const offset = fueraDeHorario() ? 2 : 1;
+  const fecha = new Date(hoy);
+  fecha.setDate(hoy.getDate() + offset);
+  // Saltar domingos
+  if (fecha.getDay() === 0) fecha.setDate(fecha.getDate() + 1);
+  return fecha;
+}
 
 function generarFechas() {
   const inp = document.getElementById('fechaEntrega');
   const hoy = new Date();
   const man = new Date(hoy); man.setDate(hoy.getDate() + 1);
   const fmt = d => d.toISOString().split('T')[0];
+  // Mínimo siempre mañana, pero valor por defecto según horario
   inp.min = fmt(man);
-  inp.value = fmt(man);
+  inp.value = fmt(fechaEntregaDefecto());
+  // Actualizar aviso de horario al cargar
+  actualizarAvisoHorario();
   inp.addEventListener('change', () => {
     const sel = new Date(inp.value + 'T12:00:00');
     if (sel.getDay() === 0) { sel.setDate(sel.getDate() + 1); inp.value = fmt(sel); }
@@ -258,6 +355,11 @@ function generarFechas() {
     document.getElementById('domingoWrap').classList.toggle('show', esSab);
     if (!esSab) { esDomingoFlag = false; document.getElementById('domingoToggle').classList.remove('on'); }
   });
+}
+
+function actualizarAvisoHorario() {
+  const aviso = document.getElementById('avisoHorario');
+  if (aviso) aviso.classList.toggle('show', fueraDeHorario());
 }
 
 function toggleDomingo() {
@@ -542,6 +644,7 @@ function abrirModal() {
   document.getElementById('modalDetalle').innerHTML = lineas.map(([p, v]) =>
     '<div class="modal-linea"><span class="m-prod">' + p + '</span><span class="m-cant">' + v + ' uds</span></div>'
   ).join('');
+  actualizarAvisoHorario();
   document.getElementById('modalOverlay').classList.add('open');
 }
 
