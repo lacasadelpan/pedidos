@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario de Pedidos — Grupo Salmarfer SL</title>
+<script src="config.js"></script>
+<!-- v5 (01/10/2026): lee los pedidos REALES de la hoja 📥 Pedidos a través del Apps Script -->
+<style>
+  :root {
+    --marron: #5C3317; --marron2: #8B5E3C; --fondo: #f5f2ee; --borde: #e6ded6; --texto: #1a1a1a; --suave: #7a6f66;
+    --var-bg: #E3F2FD; --var-tx: #1565C0; --so-bg: #E8F5E9; --so-tx: #2E7D32;
+    --uni-bg: #FFF3E0; --uni-tx: #E65100; --sep-bg: #EDE7F6; --sep-tx: #4527A0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: var(--fondo); color: var(--texto); min-height: 100vh; }
+  header { background: var(--marron); color: #fff; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header .sub { font-size: 12px; opacity: .75; }
+  .hdr-acc { display: flex; gap: 8px; align-items: center; font-size: 12px; }
+  .hdr-acc button { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 12px; }
+  .hdr-acc button:hover { background: rgba(255,255,255,.25); }
+  #estado { opacity: .8; }
+  .container { max-width: 1150px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .stat { background: #fff; border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; }
+  .stat-l { font-size: 12px; color: var(--suave); margin-bottom: 4px; }
+  .stat-v { font-size: 22px; font-weight: 700; color: var(--marron); font-variant-numeric: tabular-nums; }
+
+  .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; background: #fff; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--borde); }
+  .nav { background: none; border: 1px solid #ccc; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 15px; color: #333; }
+  .nav:hover { background: #f3efea; }
+  .mes { font-size: 17px; font-weight: 700; min-width: 170px; text-align: center; color: var(--marron); }
+  .hoy-btn { background: none; border: 1px solid var(--marron2); color: var(--marron); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+  select { font-size: 13px; padding: 7px 10px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #333; cursor: pointer; max-width: 100%; }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+
+  .leyenda { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+  .ley { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--suave); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+
+  .cal { background: #fff; border-radius: 10px; border: 1px solid var(--borde); padding: 14px; position: relative; }
+  .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+  .dn { text-align: center; font-size: 12px; color: #999; padding: 4px 0 6px; font-weight: 600; }
+  .dia { min-height: 96px; border: 1px solid #eee; border-radius: 8px; padding: 6px; background: #fff; cursor: pointer; transition: border-color .15s, box-shadow .15s; overflow: hidden; }
+  .dia:hover { border-color: var(--marron2); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .dia.vacio { background: transparent; border-color: transparent; cursor: default; box-shadow: none; }
+  .dia.hoy { border: 2px solid #1565C0; }
+  .dia.domingo { background: #faf8f6; }
+  .dia.sin { cursor: default; }
+  .dia-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .num { font-size: 12px; font-weight: 700; color: #999; }
+  .dia.hoy .num { color: #1565C0; }
+  .uds { font-size: 10px; color: var(--suave); font-variant-numeric: tabular-nums; }
+  .pill { font-size: 10px; padding: 2px 7px; border-radius: 20px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .t-var { background: var(--var-bg); color: var(--var-tx); }
+  .t-so  { background: var(--so-bg);  color: var(--so-tx); }
+  .t-uni { background: var(--uni-bg); color: var(--uni-tx); }
+  .t-sep { background: var(--sep-bg); color: var(--sep-tx); }
+  .mas { font-size: 10px; color: #aaa; }
+  .sinrep { font-size: 10px; color: #c4bab0; }
+  .cuenta { display: none; font-size: 11px; font-weight: 700; color: var(--marron); }
+
+  .cargando { position: absolute; inset: 0; background: rgba(255,255,255,.75); display: none; align-items: center; justify-content: center; font-size: 14px; color: var(--suave); border-radius: 10px; }
+  .cargando.on { display: flex; }
+  .aviso { background: #fff3e0; border: 1px solid #ffcc80; color: #8a4b00; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 13px; display: none; }
+  .aviso.on { display: block; }
+  .aviso button { margin-left: 8px; }
+
+  /* Modal */
+  .ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+  .ov.open { display: flex; }
+  .modal { background: #fff; border-radius: 12px; padding: 20px; width: min(640px, 100%); max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.18); }
+  .m-hdr { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #f0ebe6; }
+  .m-tit { font-size: 16px; font-weight: 700; color: var(--marron); }
+  .m-res { font-size: 12px; color: var(--suave); margin-top: 3px; }
+  .x { background: none; border: none; cursor: pointer; font-size: 22px; color: #aaa; line-height: 1; }
+  .x:hover { color: #333; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tab { border: 1px solid #ddd; background: #fff; border-radius: 20px; padding: 5px 12px; font-size: 12px; cursor: pointer; color: #555; }
+  .tab.on { background: var(--marron); border-color: var(--marron); color: #fff; }
+  .ped { padding: 10px 0; border-bottom: 1px solid #f3efea; }
+  .ped:last-child { border-bottom: none; }
+  .ped-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+  .ped-cli { font-size: 14px; font-weight: 700; }
+  .ped-meta { font-size: 11px; color: #999; margin-top: 2px; }
+  .ped-prods { font-size: 12px; color: #444; margin-top: 5px; line-height: 1.6; }
+  .ped-nota { font-size: 12px; color: #8a4b00; background: #fff8ec; border-radius: 6px; padding: 4px 8px; margin-top: 5px; }
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+  table.prod { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.prod th { text-align: left; font-size: 11px; color: #999; font-weight: 600; padding: 6px 4px; border-bottom: 1px solid #eee; }
+  table.prod td { padding: 6px 4px; border-bottom: 1px solid #f5f1ed; }
+  table.prod td.n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--marron); }
+  table.prod tr.fam td { background: #faf6f2; font-size: 11px; font-weight: 700; color: var(--suave); text-transform: uppercase; letter-spacing: .4px; }
+  .vacio-msg { text-align: center; padding: 28px; font-size: 14px; color: #bbb; }
+
+  /* Clave */
+  .gate { max-width: 380px; margin: 60px auto; background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 24px; text-align: center; }
+  .gate h2 { font-size: 17px; color: var(--marron); margin-bottom: 6px; }
+  .gate p { font-size: 13px; color: var(--suave); margin-bottom: 14px; line-height: 1.5; }
+  .gate input { width: 100%; font-size: 16px; padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .gate button { width: 100%; background: var(--marron); color: #fff; border: none; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .gate .err { color: #c62828; font-size: 12px; margin-top: 8px; min-height: 16px; }
+
+  @media (max-width: 640px) {
+    header { padding: 12px 16px; }
+    .container { padding: 14px 10px 30px; }
+    .cal { padding: 8px; }
+    .grid { gap: 3px; }
+    .dia { min-height: 56px; padding: 4px; }
+    .pill, .mas, .uds, .sinrep { display: none; }
+    .cuenta { display: block; }
+    .filtros { margin-left: 0; width: 100%; }
+    .filtros select { flex: 1 1 140px; }
+    .mes { min-width: 0; flex: 1; font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Calendario de Pedidos</h1>
+    <div class="sub">Grupo Salmarfer SL · Tahona por Salvador Márquez</div>
+  </div>
+  <div class="hdr-acc">
+    <span id="estado"></span>
+    <button id="btnRecargar" type="button">↻ Actualizar</button>
+    <button id="btnClave" type="button">Clave</button>
+  </div>
+</header>
+
+<div id="gate" class="gate" style="display:none">
+  <h2>Clave del calendario</h2>
+  <p>Escribe la clave para ver los pedidos.<br>Se obtiene en Apps Script ejecutando <b>verClaveCalendario</b>.</p>
+  <input id="claveInput" type="text" autocomplete="off" placeholder="XXXXXXXX">
+  <button id="claveOk" type="button">Entrar</button>
+  <div class="err" id="claveErr"></div>
+</div>
+
+<div class="container" id="app" style="display:none">
+  <div class="aviso" id="aviso"></div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-l">Pedidos del mes</div><div class="stat-v" id="sPed">—</div></div>
+    <div class="stat"><div class="stat-l">Standing Orders</div><div class="stat-v" id="sSO">—</div></div>
+    <div class="stat"><div class="stat-l">Variables</div><div class="stat-v" id="sVar">—</div></div>
+    <div class="stat"><div class="stat-l">Clientes activos</div><div class="stat-v" id="sCli">—</div></div>
+    <div class="stat"><div class="stat-l">Unidades</div><div class="stat-v" id="sUds">—</div></div>
+    <div class="stat"><div class="stat-l">Importe (sin IVA)</div><div class="stat-v" id="sImp">—</div></div>
+  </div>
+
+  <div class="toolbar">
+    <button class="nav" id="prev" type="button" aria-label="Mes anterior">←</button>
+    <span class="mes" id="mesLabel"></span>
+    <button class="nav" id="next" type="button" aria-label="Mes siguiente">→</button>
+    <button class="hoy-btn" id="hoyBtn" type="button">Hoy</button>
+    <div class="filtros">
+      <select id="fCliente"><option value="">Todos los clientes</option></select>
+      <select id="fRuta"><option value="">Todas las rutas</option></select>
+      <select id="fTipo">
+        <option value="">Todos los tipos</option>
+        <option>Variable</option>
+        <option>Standing Order</option>
+        <option>Sáb+Dom Unificado</option>
+        <option>Sáb+Dom Separado</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="leyenda">
+    <div class="ley"><div class="dot" style="background:var(--var-tx)"></div>Variable</div>
+    <div class="ley"><div class="dot" style="background:var(--so-tx)"></div>Standing Order</div>
+    <div class="ley"><div class="dot" style="background:var(--uni-tx)"></div>Sáb+Dom unificado</div>
+    <div class="ley"><div class="dot" style="background:var(--sep-tx)"></div>Sáb+Dom separado (pan del domingo)</div>
+  </div>
+
+  <div class="cal">
+    <div class="grid" id="dayNames"></div>
+    <div class="grid" id="grid" style="margin-top:4px"></div>
+    <div class="cargando" id="cargando">Cargando pedidos…</div>
+  </div>
+</div>
+
+<div class="ov" id="ov">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="m-hdr">
+      <div><div class="m-tit" id="mTit"></div><div class="m-res" id="mRes"></div></div>
+      <button class="x" id="mCerrar" type="button" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-tab="pedidos" type="button">Pedidos</button>
+      <button class="tab" data-tab="produccion" type="button">Producción del día</button>
+    </div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Configuración ──────────────────────────────────────────
+  var SCRIPT_URL = (window.SALMARFER_CONFIG && window.SALMARFER_CONFIG.SCRIPT_URL) || 'https://script.google.com/macros/s/AKfycbzGYLahIhYRcXaf0nvOqVO_lR-QmcUX1qRq5ArD_o-bJICMlZ9aquo_lRTE8qCVz5Uw/exec';
+  var LS_CLAVE   = 'calendario_salmarfer_clave';
+  var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var DIAS  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  var ORDEN_FAM = ['Bollos','Integrales','Molletes','Prieto','Panadería','Especiales'];
+
+  // ── Estado ─────────────────────────────────────────────────
+  var clave = leerClave();
+  var hoy = new Date();
+  var anio = hoy.getFullYear(), mes = hoy.getMonth();
+  var cache = {};          // 'yyyy-mm' -> { pedidos:[...], clientes:[...], generado }
+  var clientesConocidos = {};
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ── Utilidades ─────────────────────────────────────────────
+  function leerClave() { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } }
+  function guardarClave(c) { try { if (c) localStorage.setItem(LS_CLAVE, c); else localStorage.removeItem(LS_CLAVE); } catch (e) {} }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function iso(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+  function claveMes(y, m) { return y + '-' + pad(m + 1); }
+  function euros(n) { return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+  function num(n) { return n.toLocaleString('es-ES'); }
+  function claseTipo(t) {
+    if (t === 'Standing Order') return 't-so';
+    if (t === 'Sáb+Dom Unificado') return 't-uni';
+    if (t === 'Sáb+Dom Separado') return 't-sep';
+    return 't-var';
+  }
+  function el(tag, cls, txt) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (txt !== undefined && txt !== null) e.textContent = txt;
+    return e;
+  }
+
+  // ── Servidor ───────────────────────────────────────────────
+  function pedirMes(y, m) {
+    var k = claveMes(y, m);
+    if (cache[k]) return Promise.resolve(cache[k]);
+    var ultimo = new Date(y, m + 1, 0).getDate();
+    return fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // evita CORS (igual que el historial)
+      body: JSON.stringify({ accion: 'calendario', clave: clave, desde: iso(y, m, 1), hasta: iso(y, m, ultimo) })
+    }).then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res || !res.ok) {
+          var err = new Error(res && res.error ? res.error : 'Respuesta no válida');
+          err.clave = res && res.error === 'CLAVE_INCORRECTA';
+          throw err;
+        }
+        var datos = agrupar(res.lineas || []);
+        datos.generado = res.generado || '';
+        (res.clientes || []).forEach(function (c) { clientesConocidos[c.nombre] = c.ruta; });
+        cache[k] = datos;
+        return datos;
+      });
+  }
+
+  // Líneas → pedidos (una entrada por ID de pedido y fecha)
+  // línea = [fecha, id, cliente, ruta, tipo, producto, familia, cantidad, total, notas, fechaPedido]
+  function agrupar(lineas) {
+    var mapa = {}, lista = [];
+    lineas.forEach(function (l) {
+      var k = l[1] + '|' + l[0];
+      var p = mapa[k];
+      if (!p) {
+        p = mapa[k] = { fecha: l[0], id: l[1], cliente: l[2], ruta: l[3] || '—', tipo: l[4] || 'Variable',
+                        notas: [], lineas: [], uds: 0, total: 0, fechaPedido: l[10] || '' };
+        lista.push(p);
+        if (l[2] && !(l[2] in clientesConocidos)) clientesConocidos[l[2]] = l[3] || '';
+      }
+      p.lineas.push({ producto: l[5], familia: l[6] || '', cantidad: Number(l[7]) || 0, nota: l[9] || '' });
+      p.uds += Number(l[7]) || 0;
+      p.total += Number(l[8]) || 0;
+      if (l[9] && p.notas.indexOf(l[9]) === -1) p.notas.push(l[9]);
+    });
+    lista.sort(function (a, b) { return a.ruta.localeCompare(b.ruta, 'es') || a.cliente.localeCompare(b.cliente, 'es'); });
+    return { pedidos: lista };
+  }
+
+  // ── Filtros ────────────────────────────────────────────────
+  function rellenarFiltros() {
+    var selC = $('fCliente'), selR = $('fRuta');
+    var vC = selC.value, vR = selR.value;
+    var nombres = Object.keys(clientesConocidos).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+    var rutas = {};
+    nombres.forEach(function (n) { if (clientesConocidos[n]) rutas[clientesConocidos[n]] = true; });
+    selC.length = 1; selR.length = 1;
+    nombres.forEach(function (n) {
+      var o = el('option', null, n + (clientesConocidos[n] ? '  (' + clientesConocidos[n] + ')' : ''));
+      o.value = n; selC.appendChild(o);
+    });
+    Object.keys(rutas).sort(function (a, b) { return a.localeCompare(b, 'es', { numeric: true }); })
+      .forEach(function (r) { var o = el('option', null, r); o.value = r; selR.appendChild(o); });
+    selC.value = vC; selR.value = vR;
+  }
+
+  function filtrar(pedidos) {
+    var c = $('fCliente').value, r = $('fRuta').value, t = $('fTipo').value;
+    return pedidos.filter(function (p) {
+      return (!c || p.cliente === c) && (!r || p.ruta === r) && (!t || p.tipo === t);
+    });
+  }
+
+  // ── Pintar ─────────────────────────────────────────────────
+  function pintarNombresDia() {
+    var dn = $('dayNames');
+    DIAS.forEach(function (d) { dn.appendChild(el('div', 'dn', d)); });
+  }
+
+  function pintar(datos) {
+    $('mesLabel').textContent = MESES[mes] + ' ' + anio;
+    var peds = filtrar(datos ? datos.pedidos : []);
+
+    // Estadísticas
+    var cli = {}, uds = 0, imp = 0, so = 0, va = 0;
+    peds.forEach(function (p) {
+      cli[p.cliente] = 1; uds += p.uds; imp += p.total;
+      if (p.tipo === 'Standing Order') so++; else if (p.tipo === 'Variable') va++;
+    });
+    $('sPed').textContent = datos ? num(peds.length) : '—';
+    $('sSO').textContent  = datos ? num(so) : '—';
+    $('sVar').textContent = datos ? num(va) : '—';
+    $('sCli').textContent = datos ? num(Object.keys(cli).length) : '—';
+    $('sUds').textContent = datos ? num(uds) : '—';
+    $('sImp').textContent = datos ? euros(imp) : '—';
+
+    // Por día
+    var porDia = {};
+    peds.forEach(function (p) { (porDia[p.fecha] = porDia[p.fecha] || []).push(p); });
+
+    var grid = $('grid');
+    grid.textContent = '';
+    var hoyIso = iso(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    var inicio = (new Date(anio, mes, 1).getDay() + 6) % 7;
+    var dias = new Date(anio, mes + 1, 0).getDate();
+    for (var i = 0; i < inicio; i++) grid.appendChild(el('div', 'dia vacio'));
+
+    for (var d = 1; d <= dias; d++) {
+      var f = iso(anio, mes, d);
+      var domingo = new Date(anio, mes, d).getDay() === 0;
+      var lista = porDia[f] || [];
+      var cel = el('div', 'dia' + (domingo ? ' domingo' : '') + (f === hoyIso ? ' hoy' : '') + (lista.length ? '' : ' sin'));
+      var top = el('div', 'dia-top');
+      top.appendChild(el('span', 'num', d));
+      if (lista.length) {
+        var u = 0; lista.forEach(function (p) { u += p.uds; });
+        top.appendChild(el('span', 'uds', num(u) + ' uds'));
+      }
+      cel.appendChild(top);
+
+      if (!lista.length && domingo) cel.appendChild(el('div', 'sinrep', 'Sin reparto'));
+      lista.slice(0, 3).forEach(function (p) {
+        var pill = el('span', 'pill ' + claseTipo(p.tipo), p.cliente);
+        pill.title = p.cliente + ' · ' + p.tipo;
+        cel.appendChild(pill);
+      });
+      if (lista.length > 3) cel.appendChild(el('div', 'mas', '+' + (lista.length - 3) + ' más'));
+      if (lista.length) cel.appendChild(el('div', 'cuenta', lista.length + ' ped.'));
+
+      if (lista.length) (function (fecha, l) {
+        cel.addEventListener('click', function () { abrirDia(fecha, l); });
+      })(f, lista);
+      grid.appendChild(cel);
+    }
+    $('estado').textContent = datos && datos.generado ? 'Datos: ' + datos.generado : '';
+  }
+
+  // ── Modal de día ───────────────────────────────────────────
+  var diaAbierto = null;
+  function abrirDia(fecha, pedidos) {
+    diaAbierto = { fecha: fecha, pedidos: pedidos };
+    var p = fecha.split('-');
+    var f = new Date(+p[0], +p[1] - 1, +p[2]);
+    var tit = f.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    $('mTit').textContent = tit.charAt(0).toUpperCase() + tit.slice(1);
+    var uds = 0, imp = 0;
+    pedidos.forEach(function (x) { uds += x.uds; imp += x.total; });
+    $('mRes').textContent = pedidos.length + ' pedidos · ' + num(uds) + ' unidades · ' + euros(imp) + ' sin IVA';
+    cambiarTab('pedidos');
+    $('ov').classList.add('open');
+  }
+
+  function cambiarTab(tab) {
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) { b.classList.toggle('on', b.getAttribute('data-tab') === tab); });
+    var body = $('mBody');
+    body.textContent = '';
+    if (!diaAbierto) return;
+    if (tab === 'pedidos') pintarPedidos(body, diaAbierto.pedidos);
+    else pintarProduccion(body, diaAbierto.pedidos);
+  }
+
+  function pintarPedidos(body, pedidos) {
+    pedidos.forEach(function (p) {
+      var row = el('div', 'ped');
+      var topr = el('div', 'ped-top');
+      var info = el('div');
+      info.appendChild(el('div', 'ped-cli', p.cliente));
+      info.appendChild(el('div', 'ped-meta', p.ruta + ' · ' + p.id + ' · ' + num(p.uds) + ' uds · ' + euros(p.total)));
+      topr.appendChild(info);
+      topr.appendChild(el('span', 'badge ' + claseTipo(p.tipo), p.tipo));
+      row.appendChild(topr);
+      row.appendChild(el('div', 'ped-prods', p.lineas.map(function (l) {
+        return l.cantidad + ' × ' + l.producto + (l.nota && /domingo/i.test(l.nota) ? ' (domingo)' : '');
+      }).join('  ·  ')));
+      var notas = p.notas.filter(function (n) { return !/^pan del domingo\.?$/i.test(n); });
+      if (notas.length) row.appendChild(el('div', 'ped-nota', '📝 ' + notas.join(' · ')));
+      body.appendChild(row);
+    });
+  }
+
+  function pintarProduccion(body, pedidos) {
+    var tot = {}, fam = {};
+    pedidos.forEach(function (p) {
+      p.lineas.forEach(function (l) {
+        tot[l.producto] = (tot[l.producto] || 0) + l.cantidad;
+        fam[l.producto] = l.familia || 'Otros';
+      });
+    });
+    var prods = Object.keys(tot);
+    if (!prods.length) { body.appendChild(el('div', 'vacio-msg', 'Sin productos')); return; }
+    prods.sort(function (a, b) {
+      var fa = ORDEN_FAM.indexOf(fam[a]), fb = ORDEN_FAM.indexOf(fam[b]);
+      fa = fa < 0 ? 99 : fa; fb = fb < 0 ? 99 : fb;
+      return fa - fb || a.localeCompare(b, 'es');
+    });
+    var t = el('table', 'prod');
+    var th = el('tr'); th.appendChild(el('th', null, 'Producto')); var thn = el('th', null, 'Unidades'); thn.style.textAlign = 'right'; th.appendChild(thn);
+    t.appendChild(th);
+    var famActual = null, total = 0;
+    prods.forEach(function (p) {
+      if (fam[p] !== famActual) {
+        famActual = fam[p];
+        var fr = el('tr', 'fam'); var fc = el('td', null, famActual); fc.colSpan = 2; fr.appendChild(fc); t.appendChild(fr);
+      }
+      var tr = el('tr'); tr.appendChild(el('td', null, p)); tr.appendChild(el('td', 'n', num(tot[p]))); t.appendChild(tr);
+      total += tot[p];
+    });
+    var trT = el('tr'); var a = el('td', null, 'TOTAL'); a.style.fontWeight = '700'; trT.appendChild(a); trT.appendChild(el('td', 'n', num(total))); t.appendChild(trT);
+    body.appendChild(t);
+  }
+
+  // ── Carga ──────────────────────────────────────────────────
+  function aviso(txt, conReintento) {
+    var a = $('aviso');
+    a.textContent = txt || '';
+    if (conReintento) {
+      var b = el('button', 'hoy-btn', 'Reintentar');
+      b.type = 'button';
+      b.onclick = function () { cargar(true); };
+      a.appendChild(b);
+    }
+    a.classList.toggle('on', !!txt);
+  }
+
+  function cargar(forzar) {
+    if (forzar) delete cache[claveMes(anio, mes)];
+    var y = anio, m = mes;
+    $('cargando').classList.add('on');
+    aviso('');
+    pintar(cache[claveMes(y, m)] || null);
+    pedirMes(y, m).then(function (datos) {
+      if (y !== anio || m !== mes) return;      // el usuario ya cambió de mes
+      rellenarFiltros();
+      pintar(datos);
+    }).catch(function (err) {
+      if (err.clave) { pedirClave('Clave incorrecta. Vuelve a escribirla.'); return; }
+      aviso('No se han podido cargar los pedidos: ' + err.message + '. Comprueba la conexión o que el Apps Script esté desplegado (v5).', true);
+    }).then(function () { $('cargando').classList.remove('on'); });
+  }
+
+  function pedirClave(error) {
+    guardarClave('');
+    clave = '';
+    cache = {};
+    $('app').style.display = 'none';
+    $('gate').style.display = 'block';
+    $('claveErr').textContent = error || '';
+    $('claveInput').value = '';
+    $('claveInput').focus();
+  }
+
+  function entrar() {
+    var v = $('claveInput').value.trim().toUpperCase();
+    if (!v) { $('claveErr').textContent = 'Escribe la clave.'; return; }
+    clave = v;
+    guardarClave(v);
+    $('gate').style.display = 'none';
+    $('app').style.display = 'block';
+    cargar(true);
+  }
+
+  // ── Eventos ────────────────────────────────────────────────
+  $('prev').onclick = function () { mes--; if (mes < 0) { mes = 11; anio--; } cargar(); };
+  $('next').onclick = function () { mes++; if (mes > 11) { mes = 0; anio++; } cargar(); };
+  $('hoyBtn').onclick = function () { anio = hoy.getFullYear(); mes = hoy.getMonth(); cargar(); };
+  $('btnRecargar').onclick = function () { cache = {}; cargar(true); };
+  $('btnClave').onclick = function () { pedirClave(''); };
+  $('claveOk').onclick = entrar;
+  $('claveInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
+  ['fCliente', 'fRuta', 'fTipo'].forEach(function (id) {
+    $(id).addEventListener('change', function () { pintar(cache[claveMes(anio, mes)] || null); });
+  });
+  $('mCerrar').onclick = function () { $('ov').classList.remove('open'); };
+  $('ov').addEventListener('click', function (e) { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') $('ov').classList.remove('open'); });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
+    b.addEventListener('click', function () { cambiarTab(b.getAttribute('data-tab')); });
+  });
+
+  // ── Inicio ─────────────────────────────────────────────────
+  pintarNombresDia();
+  if (clave) { $('app').style.display = 'block'; cargar(); }
+  else pedirClave('');
+})();
+</script>
+</body>
+</html>
